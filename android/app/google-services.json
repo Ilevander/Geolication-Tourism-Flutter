@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "168860786920",
+    "project_id": "geolocation-flttr",
+    "storage_bucket": "geolocation-flttr.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168860786920:android:392bed9728bdf00fef295d",
+        "android_client_info": {
+          "package_name": "com.example.geo_app_fltr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLfk3R0Z5atEVqTxSEdl9H1bU5xVe2KAg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
