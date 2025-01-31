@@ -14,16 +14,20 @@ class AuthService with ChangeNotifier {
           .FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      await userCredential.user!.updateDisplayName(name);
+      if (userCredential.user != null) {
+        await userCredential.user!.updateDisplayName(name);
 
-      _user = app_model.User(
-        id: userCredential.user!.uid,
-        email: userCredential.user!.email!,
-        name: name,
-        photoUrl: userCredential.user!.photoURL ?? '',
-      );
+        _user = app_model.User(
+          id: userCredential.user!.uid,
+          email: userCredential.user!.email!,
+          name: name,
+          photoUrl: userCredential.user!.photoURL ?? '',
+        );
 
-      notifyListeners();
+        notifyListeners();
+      } else {
+        throw Exception("Aucun utilisateur trouvé après l'inscription.");
+      }
     } catch (e) {
       print("Erreur d'inscription : $e");
       rethrow;
@@ -31,11 +35,13 @@ class AuthService with ChangeNotifier {
   }
 
   Future<void> signInWithEmail(String email, String password) async {
+    print("Tentative de connexion avec email : $email");
     try {
       firebase_auth.UserCredential userCredential = await firebase_auth
           .FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-
+      print(
+          "Connexion réussie pour l'utilisateur : ${userCredential.user!.uid}");
       _user = app_model.User(
         id: userCredential.user!.uid,
         email: userCredential.user!.email!,
@@ -44,31 +50,46 @@ class AuthService with ChangeNotifier {
       );
 
       notifyListeners();
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      String errorMessage;
+      if (e.code == 'user-not-found') {
+        errorMessage = "Aucun utilisateur trouvé avec cet email.";
+      } else if (e.code == 'wrong-password') {
+        errorMessage = "Mot de passe incorrect.";
+      } else {
+        errorMessage = "Erreur de connexion : ${e.message}";
+      }
+      print(errorMessage);
+      rethrow;
     } catch (e) {
-      print("Erreur de connexion : $e");
+      print("Erreur inattendue : $e");
       rethrow;
     }
   }
 
   Future<void> signOut() async {
-    await firebase_auth.FirebaseAuth.instance
-        .signOut(); 
-    _user = null;
-    notifyListeners();
+    try {
+      await firebase_auth.FirebaseAuth.instance.signOut();
+      _user = null;
+      notifyListeners();
+    } catch (e) {
+      print("Erreur lors de la déconnexion : $e");
+      rethrow;
+    }
   }
 
   Future<void> checkAuthState() async {
-  firebase_auth.User? firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+    firebase_auth.User? firebaseUser =
+        firebase_auth.FirebaseAuth.instance.currentUser;
 
-  if (firebaseUser != null) {
-    _user = app_model.User(
-      id: firebaseUser.uid,
-      email: firebaseUser.email!,
-      name: firebaseUser.displayName ?? 'Utilisateur',
-      photoUrl: firebaseUser.photoURL ?? '',
-    );
-    notifyListeners();
+    if (firebaseUser != null && firebaseUser.email != null) {
+      _user = app_model.User(
+        id: firebaseUser.uid,
+        email: firebaseUser.email!,
+        name: firebaseUser.displayName ?? 'Utilisateur',
+        photoUrl: firebaseUser.photoURL ?? '',
+      );
+      notifyListeners();
+    }
   }
-}
-
 }

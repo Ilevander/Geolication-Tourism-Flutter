@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 
 class HomeScreen extends StatelessWidget {
-  // Liste de points d'intérêt (POI) populaires
+
   final List<Map<String, String>> popularPlaces = [
     {
       'name': 'Tour Eiffel',
@@ -171,7 +171,7 @@ class HomeScreen extends StatelessWidget {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Naviguer vers une page de découverte
+                    Navigator.pushNamed(context, '/map');
                   },
                   child: Text('Explorer plus de lieux'),
                 ),
