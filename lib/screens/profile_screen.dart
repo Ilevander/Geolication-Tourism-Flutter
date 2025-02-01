@@ -16,7 +16,6 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () {
-              // Naviguer vers l'écran de modification du profil
             },
           ),
         ],
@@ -105,5 +104,4 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-}
+  }}

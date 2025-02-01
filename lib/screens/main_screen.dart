@@ -17,7 +17,6 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
-  // Méthode pour mettre à jour l'index sélectionné
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -27,10 +26,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex], // Affiche l'écran sélectionné
+      body: _screens[_selectedIndex], 
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // Index actuel
-        onTap: _onItemTapped, // Méthode appelée lorsqu'un élément est sélectionné
+        currentIndex: _selectedIndex, 
+        onTap: _onItemTapped, 
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -45,8 +44,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Profil',
           ),
         ],
-        selectedItemColor: Colors.blue, // Couleur de l'élément sélectionné
-        unselectedItemColor: Colors.grey, // Couleur des éléments non sélectionnés
+        selectedItemColor: Colors.blue, 
+        unselectedItemColor: Colors.grey, 
       ),
     );
   }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_webservice2/places.dart';
 import 'package:provider/provider.dart';
-
 import '../services/auth_service.dart';
 
 class HomeScreen extends StatelessWidget {
-
   final List<Map<String, String>> popularPlaces = [
     {
       'name': 'Tour Eiffel',
@@ -34,10 +33,12 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              // Ajouter une fonction de recherche
+              showSearch(
+                context: context,
+                delegate: CustomSearchDelegate(), // Utiliser un delegate de recherche
+              );
             },
           ),
-          // Bouton pour accéder au profil ou se connecter
           IconButton(
             icon: Icon(authService.user != null ? Icons.person : Icons.login),
             onPressed: () {
@@ -180,6 +181,76 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class CustomSearchDelegate extends SearchDelegate<String> {
+  final String apiKey = 'AIzaSyCfWJjWL1dS0AtLvkYIdduhISpbRvbjRi4'; // Remplacez par votre clé API
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null!);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return Center(
+      child: Text('Vous avez sélectionné : $query'),
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final places = GoogleMapsPlaces(apiKey: apiKey);
+
+    return FutureBuilder<List<Prediction>>(
+      future: places.autocomplete(query, region: 'ma').then((response) {
+        if (response.isOkay) {
+          return response.predictions;
+        } else {
+          return [];
+        }
+      }),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Erreur : ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('Aucun résultat trouvé'));
+        } else {
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              final prediction = snapshot.data![index];
+              return ListTile(
+                title: Text(prediction.description!),
+                onTap: () {
+                  close(context, prediction.description!);
+                },
+              );
+            },
+          );
+        }
+      },
     );
   }
 }
