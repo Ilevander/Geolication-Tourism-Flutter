@@ -1,256 +1,102 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_webservice2/places.dart';
-import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
+import 'package:geo_app_fltr/screens/category_details_screen.dart';
+import 'package:geo_app_fltr/screens/map_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  final List<Map<String, String>> popularPlaces = [
-    {
-      'name': 'Tour Eiffel',
-      'location': 'Paris, France',
-      'image': 'https://via.placeholder.com/150',
-    },
-    {
-      'name': 'Machu Picchu',
-      'location': 'Cusco, Pérou',
-      'image': 'https://via.placeholder.com/150',
-    },
-    {
-      'name': 'Grand Canyon',
-      'location': 'Arizona, USA',
-      'image': 'https://via.placeholder.com/150',
-    },
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, String>> categories = [
+    {'icon': 'assets/images/atm.png', 'label': 'ATM'},
+    {'icon': 'assets/images/bank.png', 'label': 'BANKS'},
+    {'icon': 'assets/images/mosque.png', 'label': 'MOSQUE'},
+    {'icon': 'assets/images/beach.png', 'label': 'BEACH'},
+    {'icon': 'assets/images/cinema.png', 'label': 'CINEMA'},
+    {'icon': 'assets/images/coffee.png', 'label': 'COFFEE'},
+    {'icon': 'assets/images/education.png', 'label': 'EDUCATION'},
+    {'icon': 'assets/images/hotel.png', 'label': 'HOTELS'},
+    {'icon': 'assets/images/mall.png', 'label': 'MALL'},
+    {'icon': 'assets/images/restaurant.png', 'label': 'RESTAURANT'},
+    {'icon': 'assets/images/hospital.png', 'label': 'HOSPITAL'},
+    {'icon': 'assets/images/garden.png', 'label': 'GARDEN'},
   ];
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-
     return Scaffold(
+      backgroundColor: Colors.orange.shade100,
       appBar: AppBar(
-        title: Text('Tourisme Places'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: CustomSearchDelegate(), // Utiliser un delegate de recherche
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(authService.user != null ? Icons.person : Icons.login),
-            onPressed: () {
-              if (authService.user != null) {
-                // Naviguer vers le profil utilisateur
-                // Exemple : Navigator.pushNamed(context, '/profile');
-              } else {
-                // Naviguer vers l'écran de connexion
-                Navigator.pushNamed(context, '/login');
-              }
-            },
-          ),
-        ],
+        backgroundColor: const Color.fromARGB(255, 129, 231, 182),
+        title: Text(
+          'Tourism Place Finder',
+          style: TextStyle(color: const Color.fromARGB(255, 110, 110, 110)),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Titre et description de l'application
-              Text(
-                'Bienvenue sur Tourisme Places',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MapScreen(category: "All Places"),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 129, 231, 182),
+                foregroundColor: const Color.fromARGB(255, 110, 110, 110),
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
-              Text(
-                'Découvrez des lieux incroyables et planifiez vos voyages en fonction de vos préférences.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+              child: Text('Open Map'),
+            ),
+          ),
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.all(16),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 1,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
               ),
-              SizedBox(height: 20),
-
-              // Section des points d'intérêt populaires
-              Text(
-                'Lieux populaires',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                height: 200,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: popularPlaces.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        // Naviguer vers la page détaillée du lieu
-                      },
-                      child: Card(
-                        margin: EdgeInsets.only(right: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.network(
-                              popularPlaces[index]['image']!,
-                              width: 150,
-                              height: 120,
-                              fit: BoxFit.cover,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    popularPlaces[index]['name']!,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    popularPlaces[index]['location']!,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CategoryDetailsScreen(
+                            category: categories[index]['label']!),
                       ),
                     );
                   },
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // Section des recommandations personnalisées
-              Text(
-                'Recommandations pour vous',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: popularPlaces.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(popularPlaces[index]['image']!),
-                    ),
-                    title: Text(popularPlaces[index]['name']!),
-                    subtitle: Text(popularPlaces[index]['location']!),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      // Naviguer vers la page détaillée du lieu
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 20),
-
-              // Bouton pour explorer plus de lieux
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/map');
-                  },
-                  child: Text('Explorer plus de lieux'),
-                ),
-              ),
-            ],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        categories[index]['icon']!,
+                        height: 40,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        categories[index]['label']!,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
+        ],
       ),
-    );
-  }
-}
-
-class CustomSearchDelegate extends SearchDelegate<String> {
-  final String apiKey = 'AIzaSyCfWJjWL1dS0AtLvkYIdduhISpbRvbjRi4'; // Remplacez par votre clé API
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null!);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return Center(
-      child: Text('Vous avez sélectionné : $query'),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final places = GoogleMapsPlaces(apiKey: apiKey);
-
-    return FutureBuilder<List<Prediction>>(
-      future: places.autocomplete(query, region: 'ma').then((response) {
-        if (response.isOkay) {
-          return response.predictions;
-        } else {
-          return [];
-        }
-      }),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Erreur : ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('Aucun résultat trouvé'));
-        } else {
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final prediction = snapshot.data![index];
-              return ListTile(
-                title: Text(prediction.description!),
-                onTap: () {
-                  close(context, prediction.description!);
-                },
-              );
-            },
-          );
-        }
-      },
     );
   }
 }

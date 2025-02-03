@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:geo_app_fltr/models/place_type.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_webservice2/places.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
 class MapScreen extends StatefulWidget {
+  final String category;
+
+  MapScreen({required this.category});
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
@@ -13,21 +19,22 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController;
   LatLng? _currentLocation;
-  final TextEditingController _searchController = TextEditingController();
-  List<Prediction> _predictions = [];
-  final String _apiKey =
-      'VOTRE_CLE_API_GOOGLE_PLACES'; // Remplacez par votre clé API
+  final String _apiKey = 'AIzaSyCfWJjWL1dS0AtLvkYIdduhISpbRvbjRi4';
   String _mapStyle = '';
+  Set<Marker> _markers = {};
 
   @override
   void initState() {
     super.initState();
     _loadMapStyle();
-    _getCurrentLocation();
+    _getCurrentLocation().then((_) {
+      if (widget.category.isNotEmpty && _currentLocation != null) {
+        _searchPlacesByCategory(widget.category);
+      }
+    });
   }
 
   Future<void> _loadMapStyle() async {
-    // Charger le style JSON depuis les assets
     _mapStyle = await rootBundle.loadString('assets/map_style.json');
   }
 
@@ -73,39 +80,76 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _searchPlaces(String query) async {
-    if (query.isEmpty) {
-      setState(() {
-        _predictions = [];
-      });
-      return;
-    }
+  Future<void> _searchPlacesByCategory(String category) async {
+    if (_currentLocation == null) return;
 
     final places = GoogleMapsPlaces(apiKey: _apiKey);
-    final response = await places.autocomplete(query);
+    PlaceType placeType;
+
+    switch (category.toLowerCase()) {
+      case 'atm':
+      case 'bank':
+        placeType = PlaceType.bank;
+        break;
+      case 'mosque':
+        placeType = PlaceType.church;  
+        break;
+      case 'beach':
+        placeType = PlaceType.beach;
+        break;
+      case 'cinema':
+        placeType = PlaceType.movie_theater;
+        break;
+      case 'coffee':
+        placeType = PlaceType.cafe;
+        break;
+      case 'education':
+        placeType = PlaceType.school;
+        break;
+      case 'hotel':
+        placeType = PlaceType.hotel;
+        break;
+      case 'mall':
+        placeType = PlaceType.shopping_mall;
+        break;
+      case 'restaurant':
+        placeType = PlaceType.restaurant;
+        break;
+      case 'hospital':
+        placeType = PlaceType.hospital;
+        break;
+      case 'garden':
+        placeType = PlaceType.park;
+        break;
+      default:
+        placeType = PlaceType.point_of_interest; 
+    }
+
+    final response = await places.searchNearbyWithRadius(
+      Location(lat: _currentLocation!.latitude, lng: _currentLocation!.longitude),
+      5000,
+      type: placeType.toString().split('.').last,
+    );
 
     if (response.isOkay) {
       setState(() {
-        _predictions = response.predictions;
+        _markers.clear();
+        for (var place in response.results) {
+          _markers.add(
+            Marker(
+              markerId: MarkerId(place.placeId!),
+              position: LatLng(
+                place.geometry!.location.lat,
+                place.geometry!.location.lng,
+              ),
+              infoWindow: InfoWindow(
+                title: place.name,
+                snippet: place.vicinity,
+              ),
+            ),
+          );
+        }
       });
-    }
-  }
-
-  Future<void> _onPlaceSelected(Prediction prediction) async {
-    final places = GoogleMapsPlaces(apiKey: _apiKey);
-    final details = await places.getDetailsByPlaceId(prediction.placeId!);
-
-    if (details.isOkay) {
-      final location = details.result.geometry!.location;
-      setState(() {
-        _currentLocation = LatLng(location.lat, location.lng);
-      });
-
-      if (_mapController != null) {
-        _mapController!.animateCamera(
-          CameraUpdate.newLatLngZoom(_currentLocation!, 14),
-        );
-      }
     }
   }
 
@@ -113,44 +157,14 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Carte avec recherche'),
+        backgroundColor: Colors.teal,
+        title: Text(
+          'Résultat de Map',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Rechercher un lieu...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              onChanged: (value) {
-                _searchPlaces(value);
-              },
-            ),
-          ),
-          if (_predictions.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                itemCount: _predictions.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_predictions[index].description!),
-                    onTap: () {
-                      _onPlaceSelected(_predictions[index]);
-                      setState(() {
-                        _predictions = [];
-                        _searchController.clear();
-                      });
-                    },
-                  );
-                },
-              ),
-            ),
           Expanded(
             child: _currentLocation == null
                 ? Center(child: CircularProgressIndicator())
@@ -161,17 +175,9 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     onMapCreated: (controller) {
                       _mapController = controller;
-                      // Appliquer le style personnalisé
                       controller.setMapStyle(_mapStyle);
                     },
-                    markers: {
-                      Marker(
-                        markerId: MarkerId("currentLocation"),
-                        position: _currentLocation!,
-                        infoWindow:
-                            InfoWindow(title: "Votre position actuelle"),
-                      ),
-                    },
+                    markers: _markers,
                     myLocationEnabled: true,
                     myLocationButtonEnabled: true,
                   ),

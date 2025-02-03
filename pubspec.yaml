@@ -31,10 +31,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_maps_flutter: ^2.10.0     # Intégration de Google Maps
-  geolocator: ^13.0.2            # Géolocalisation
-  provider: ^6.1.2                # Gestion de l'état
-  flutter_rating_bar: ^4.0.1     # Widget pour les évaluations
+  google_maps_flutter: ^2.10.0     
+  geolocator: ^13.0.2            
+  provider: ^6.1.2               
+  flutter_rating_bar: ^4.0.1     
   cached_network_image: ^3.4.1
   http: ^1.3.0
   #Firebase
@@ -47,6 +47,16 @@ dependencies:
   firebase_app_check: ^0.3.2+1
   google_maps_webservice2: ^1.0.4
   geolocator_android: ^4.6.1
+  uuid: ^4.5.1
+  google_api_headers: ^4.3.4
+  #flutter_google_places:
+  google_fonts:
+  path_provider:
+  image:
+  image_picker:
+  custom_info_window: ^1.0.1
+  location_geocoder: ^1.0.5
+  flutter_polyline_points: ^2.1.0
 
 dependency_overrides:
   meta: 1.15.0

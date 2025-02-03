@@ -81,7 +81,7 @@ class LoginScreen extends StatelessWidget {
                         fontSize: 16.0,
                       );
 
-                      Navigator.pushReplacementNamed(context, '/main');
+                      Navigator.pushReplacementNamed(context, '/auto-search');
                     } on firebase_auth.FirebaseAuthException catch (e) {
                       Navigator.of(context).pop();
 

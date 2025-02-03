@@ -15,8 +15,7 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.edit),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -91,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
                   Navigator.pushReplacementNamed(context, '/welcome');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, // Couleur du bouton
+                  backgroundColor: const Color.fromARGB(255, 129, 231, 182),
                   padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 ),
                 child: Text(
@@ -104,4 +103,5 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
     );
-  }}
+  }
+}
